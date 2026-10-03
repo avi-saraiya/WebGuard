@@ -27,6 +27,7 @@ class MissingCspRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Missing Content-Security-Policy"
+    check_name = "Content-Security-Policy"
     references = (MDN_HEADERS + "Content-Security-Policy", OWASP_CSP)
 
     def evaluate(self, ctx: ScanContext) -> RuleOutcome:
@@ -110,6 +111,7 @@ class WeakCspRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Content-Security-Policy allows risky script sources"
+    check_name = "CSP script sources"
     references = (MDN_HEADERS + "Content-Security-Policy/script-src", OWASP_CSP)
 
     def evaluate(self, ctx: ScanContext) -> RuleOutcome:
@@ -158,6 +160,7 @@ class ContentTypeOptionsRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Missing X-Content-Type-Options header"
+    check_name = "X-Content-Type-Options"
     references = (MDN_HEADERS + "X-Content-Type-Options", OWASP_HEADERS)
 
     _rationale = (
@@ -208,6 +211,7 @@ class ClickjackingRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Missing clickjacking protection"
+    check_name = "Clickjacking protection"
     references = (
         MDN_HEADERS + "Content-Security-Policy/frame-ancestors",
         MDN_HEADERS + "X-Frame-Options",
@@ -312,6 +316,7 @@ class ReferrerPolicyRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Referrer-Policy not set"
+    check_name = "Referrer-Policy"
     references = (MDN_HEADERS + "Referrer-Policy", OWASP_HEADERS)
 
     def evaluate(self, ctx: ScanContext) -> RuleOutcome:

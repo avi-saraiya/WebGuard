@@ -28,7 +28,8 @@ export interface Finding {
 
 export interface CheckResult {
   rule_id: string;
-  title: string;
+  /** Neutral check name for the checks list, e.g. "Content-Security-Policy". */
+  name: string;
   category: Category;
   status: CheckStatus;
   summary: string;

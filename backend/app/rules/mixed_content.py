@@ -25,6 +25,7 @@ class MixedContentRule(SecurityRule):
     version = 1
     category = Category.MIXED_CONTENT
     title = "Mixed content detected"
+    check_name = "Mixed content"
     references = (
         "https://developer.mozilla.org/docs/Web/Security/Mixed_content",
         "https://web.dev/articles/what-is-mixed-content",

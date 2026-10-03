@@ -50,7 +50,7 @@ def analyze(request: ScanRequest, registry: RuleRegistry) -> ScanResponse:
         checks.append(
             CheckResult(
                 rule_id=rule.id,
-                title=rule.title,
+                name=rule.check_name,
                 category=rule.category,
                 status=outcome.status,
                 summary=outcome.summary,

@@ -19,6 +19,7 @@ class HttpsRule(SecurityRule):
     version = 1
     category = Category.TRANSPORT
     title = "Page not served over HTTPS"
+    check_name = "HTTPS"
     references = (
         "https://developer.mozilla.org/docs/Web/Security/Transport_Layer_Security",
         "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html",
@@ -76,6 +77,7 @@ class HstsRule(SecurityRule):
     version = 1
     category = Category.TRANSPORT
     title = "Missing Strict-Transport-Security header"
+    check_name = "Strict-Transport-Security"
     references = (
         MDN_HSTS,
         "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html",

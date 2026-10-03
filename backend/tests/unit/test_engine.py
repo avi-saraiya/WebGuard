@@ -14,6 +14,7 @@ class PassingRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Always passes"
+    check_name = "Passing check"
 
     def evaluate(self, ctx: ScanContext) -> RuleOutcome:
         return self.outcome(CheckStatus.PASS, "ok")
@@ -25,6 +26,7 @@ def _failing_rule(rule_id: str, severity: Severity) -> type[SecurityRule]:
         version = 2
         category = Category.HTTP_SECURITY
         title = f"Fails {rule_id}"
+        check_name = f"Check {rule_id}"
         references = ("https://example.org/ref",)
 
         def evaluate(self, ctx: ScanContext) -> RuleOutcome:
@@ -49,6 +51,7 @@ class CrashingRule(SecurityRule):
     version = 1
     category = Category.HTTP_SECURITY
     title = "Crashes"
+    check_name = "Crashing check"
 
     def evaluate(self, ctx: ScanContext) -> RuleOutcome:
         raise RuntimeError("boom")
@@ -115,5 +118,6 @@ def test_registry_rejects_duplicates_and_bad_ids() -> None:
 def test_builtin_rules_have_unique_complete_metadata() -> None:
     for rule in builtin_registry.all():
         assert rule.title
+        assert rule.check_name
         assert rule.version >= 1
         assert rule.references, f"{rule.id} should cite at least one reference"

@@ -24,21 +24,21 @@ const RESULT = makeScanResponse({
   checks: [
     {
       rule_id: "WEB-001",
-      title: "Missing Content-Security-Policy",
+      name: "Content-Security-Policy",
       category: "HTTP_SECURITY",
       status: "MISSING",
       summary: "No enforced policy.",
     },
     {
       rule_id: "WEB-003",
-      title: "Missing X-Content-Type-Options header",
+      name: "X-Content-Type-Options",
       category: "HTTP_SECURITY",
       status: "PASS",
       summary: "nosniff",
     },
     {
       rule_id: "WEB-004",
-      title: "Mixed content detected",
+      name: "Mixed content",
       category: "MIXED_CONTENT",
       status: "UNABLE_TO_DETERMINE",
       summary: "Page resources were not collected.",
@@ -238,8 +238,38 @@ describe("App: results", () => {
     await renderAndScan();
 
     const checks = await screen.findByLabelText("Security checks");
-    await userEvent.click(within(checks).getByRole("button", { name: "Missing Content-Security-Policy" }));
+    await userEvent.click(within(checks).getByRole("button", { name: "Content-Security-Policy" }));
 
     expect(screen.getByRole("heading", { name: "What was detected?" })).toBeInTheDocument();
+  });
+});
+
+describe("App: text rendering", () => {
+  it("renders backtick spans as code without interpreting markup", async () => {
+    givenActiveTab("https://example.com/");
+    const finding = makeFinding({ recommendation: "Send `X-Content-Type-Options: nosniff` <b>now</b>." });
+    givenMessages({ scan: { ok: true, result: makeScanResponse({ findings: [finding] }) } });
+    await renderAndScan();
+
+    await userEvent.click(await screen.findByRole("button", { name: /Missing Content-Security-Policy/ }));
+
+    const code = screen.getByText("X-Content-Type-Options: nosniff");
+    expect(code.tagName).toBe("CODE");
+    expect(code.parentElement).toHaveTextContent("<b>now</b>");
+    expect(document.querySelector("b")).toBeNull();
+  });
+
+  it("labels evidence keys with readable acronyms", async () => {
+    givenActiveTab("https://example.com/");
+    const finding = makeFinding({
+      evidence: { meta_policies: [], resources: [{ url: "http://x.test/a.js" }] },
+    });
+    givenMessages({ scan: { ok: true, result: makeScanResponse({ findings: [finding] }) } });
+    await renderAndScan();
+
+    await userEvent.click(await screen.findByRole("button", { name: /Missing Content-Security-Policy/ }));
+
+    expect(screen.getByText("Meta policies")).toBeInTheDocument();
+    expect(screen.getByText("URL: http://x.test/a.js")).toBeInTheDocument();
   });
 });

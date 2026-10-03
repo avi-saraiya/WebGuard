@@ -23,7 +23,8 @@ class SecurityRule(ABC):
     id: ClassVar[str]
     version: ClassVar[int]
     category: ClassVar[Category]
-    title: ClassVar[str]
+    title: ClassVar[str]  # finding title, phrased as the problem ("Missing X")
+    check_name: ClassVar[str]  # neutral name for the checks list ("X")
     references: ClassVar[tuple[str, ...]] = ()
 
     @abstractmethod

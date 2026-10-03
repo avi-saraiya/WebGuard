@@ -1,4 +1,5 @@
 import type { CheckResult, CheckStatus } from "../types/scan";
+import { InlineText } from "./InlineText";
 
 const STATUS_DISPLAY: Record<CheckStatus, { icon: string; label: string; tone: string }> = {
   PASS: { icon: "✓", label: "Pass", tone: "pass" },
@@ -29,14 +30,14 @@ export function ChecksTable({ checks, findingIds, onOpenFinding }: ChecksTablePr
             <span className="check__body">
               {hasFinding ? (
                 <button type="button" className="link-button" onClick={() => onOpenFinding(check.rule_id)}>
-                  {check.title}
+                  {check.name}
                 </button>
               ) : (
-                <span>{check.title}</span>
+                <span>{check.name}</span>
               )}
               <span className="check__summary">
                 <span className="visually-hidden">{status.label}: </span>
-                {check.summary}
+                <InlineText text={check.summary} />
               </span>
             </span>
           </li>

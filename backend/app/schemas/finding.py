@@ -62,7 +62,7 @@ class CheckResult(BaseModel):
     """The outcome of one rule, whether or not it produced a finding."""
 
     rule_id: str
-    title: str
+    name: str
     category: Category
     status: CheckStatus
     summary: str

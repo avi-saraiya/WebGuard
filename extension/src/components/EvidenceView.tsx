@@ -42,7 +42,12 @@ function EvidenceValue({ value }: { value: unknown }) {
   return <code className="evidence__code">{String(value)}</code>;
 }
 
+const ACRONYMS: Record<string, string> = { url: "URL", csp: "CSP", http: "HTTP" };
+
 function humanize(key: string): string {
-  const text = key.replace(/_/g, " ");
+  const text = key
+    .split("_")
+    .map((word) => ACRONYMS[word] ?? word)
+    .join(" ");
   return text.charAt(0).toUpperCase() + text.slice(1);
 }

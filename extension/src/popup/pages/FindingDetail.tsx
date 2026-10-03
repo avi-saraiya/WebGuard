@@ -1,4 +1,5 @@
 import { EvidenceView } from "../../components/EvidenceView";
+import { InlineText } from "../../components/InlineText";
 import { SeverityBadge } from "../../components/SeverityBadge";
 import type { Finding } from "../../types/scan";
 
@@ -41,7 +42,9 @@ export function FindingDetail({ finding, onBack }: { finding: Finding; onBack: (
 
       <section>
         <h3>What was detected?</h3>
-        <p>{finding.description}</p>
+        <p>
+          <InlineText text={finding.description} />
+        </p>
       </section>
       <section>
         <h3>Where?</h3>
@@ -49,7 +52,9 @@ export function FindingDetail({ finding, onBack }: { finding: Finding; onBack: (
       </section>
       <section>
         <h3>Why does this matter?</h3>
-        <p>{finding.rationale}</p>
+        <p>
+          <InlineText text={finding.rationale} />
+        </p>
       </section>
       <section>
         <h3>Evidence</h3>
@@ -57,7 +62,9 @@ export function FindingDetail({ finding, onBack }: { finding: Finding; onBack: (
       </section>
       <section>
         <h3>Recommendation</h3>
-        <p>{finding.recommendation}</p>
+        <p>
+          <InlineText text={finding.recommendation} />
+        </p>
       </section>
       {references.length > 0 && (
         <section>

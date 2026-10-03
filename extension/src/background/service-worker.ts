@@ -1,9 +1,10 @@
 import type { ExtensionMessage } from "../services/messaging";
 import { clearCachedScan, getCachedScan, runScan } from "./scan";
 
-function isTrustedSender(sender: chrome.runtime.MessageSender): boolean {
-  // Only our own extension pages (the popup) may drive scans; never web pages or content scripts.
-  return sender.id === chrome.runtime.id && sender.tab === undefined;
+export function isTrustedSender(sender: chrome.runtime.MessageSender): boolean {
+  // Only our own extension pages (e.g. the popup) may drive scans. Content scripts share our
+  // extension ID but report the web page's URL, so checking the sender URL's origin excludes them.
+  return sender.id === chrome.runtime.id && (sender.url ?? "").startsWith(chrome.runtime.getURL(""));
 }
 
 chrome.runtime.onMessage.addListener((message: ExtensionMessage, sender, sendResponse) => {

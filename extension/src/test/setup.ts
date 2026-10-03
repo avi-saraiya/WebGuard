@@ -8,6 +8,7 @@ export function createChromeMock() {
   return {
     runtime: {
       id: "test-extension-id",
+      getURL: (path: string) => `chrome-extension://test-extension-id/${path}`,
       sendMessage: vi.fn(async (_message: unknown): Promise<unknown> => undefined),
       onMessage: { addListener: vi.fn(), removeListener: vi.fn() },
     },
