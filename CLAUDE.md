@@ -52,9 +52,10 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 - One commit per implementation step, with a tag per version (`v0.1.0`, `v0.2.0`, …).
 
 ## Git
-- **Never** add `Co-Authored-By` trailers or "Generated with Claude Code" lines to commits or PRs.
-  (`.claude/settings.json` also disables attribution.)
-- Don't push or create remotes unless asked.
+- End commit messages with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` (attribution re-enabled
+  from Milestone 1 onward; commits up to `v0.1.0` have none).
+- Remote: `origin` = https://github.com/avi-saraiya/WebGuard (private). Push only when asked.
+- CI (`.github/workflows/ci.yml`) runs on push to `main` and on PRs.
 
 ## Commands
 Run from the repo root (see `Makefile`):
