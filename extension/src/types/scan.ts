@@ -1,0 +1,57 @@
+// Mirrors backend/app/schemas/{finding,scan}.py. Keep in sync with the API contract.
+
+export const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFORMATIONAL"] as const;
+export type Severity = (typeof SEVERITIES)[number];
+
+export type Confidence = "HIGH" | "MEDIUM" | "LOW";
+
+export type CheckStatus =
+  "PASS" | "MISSING" | "WEAK" | "MISCONFIGURED" | "NOT_APPLICABLE" | "UNABLE_TO_DETERMINE";
+
+export type Category = "TRANSPORT" | "HTTP_SECURITY" | "MIXED_CONTENT";
+
+export interface Finding {
+  id: string;
+  rule_version: number;
+  category: Category;
+  title: string;
+  severity: Severity;
+  confidence: Confidence;
+  description: string;
+  location: string;
+  rationale: string;
+  evidence: Record<string, unknown>;
+  recommendation: string;
+  references: string[];
+  detected_at: string;
+}
+
+export interface CheckResult {
+  rule_id: string;
+  title: string;
+  category: Category;
+  status: CheckStatus;
+  summary: string;
+}
+
+export interface SeveritySummary {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  informational: number;
+}
+
+export interface ScanResponse {
+  scan_id: string;
+  target: { url: string; host: string; scheme: string };
+  summary: SeveritySummary;
+  findings: Finding[];
+  checks: CheckResult[];
+  engine_version: string;
+  analyzed_at: string;
+}
+
+export interface ScanRequest {
+  url: string;
+}
