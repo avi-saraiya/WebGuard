@@ -57,14 +57,15 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 Run from the repo root (see `Makefile`):
 - `make install`: install backend (uv) and extension (npm) dependencies
 - `make test` / `make lint` / `make format` / `make build`
-- `make dev-backend`: run the API on http://localhost:8000
+- `make dev-backend`: run the API on http://localhost:8000 (OpenAPI docs at /docs outside production)
+- Backend only (from `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run mypy app tests`. uv lives in `~/.local/bin`.
 
 ## Current status / next steps
 Phase: v0.1 skeleton → Milestone 1 (≈ v0.2).
 
 - [x] 0. CLAUDE.md + `.claude/settings.json`
 - [x] 1. Repo bootstrap (git init, .gitignore, .editorconfig, spec → docs/, README stub, Makefile)
-- [ ] 2. Backend skeleton (uv, FastAPI, config/logging/errors/middleware, health, mock POST /scans, pytest/ruff/mypy)
+- [x] 2. Backend skeleton (uv, FastAPI, config/logging/errors/middleware, health, mock POST /scans, pytest/ruff/mypy)
 - [ ] 3. Extension skeleton (Vite React TS, manifest, service worker, popup + Run Scan → mock backend, Vitest)
 - [ ] 4. Docker, CI, dependabot, architecture.md stub → tag v0.1.0
 - [ ] 5. Rule engine + schemas

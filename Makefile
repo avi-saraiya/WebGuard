@@ -12,7 +12,7 @@ test:
 	cd extension && npm test
 
 lint:
-	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app
+	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app tests
 	cd extension && npm run lint && npm run typecheck
 
 format:
