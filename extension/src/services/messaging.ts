@@ -5,6 +5,10 @@ export type RunScanMessage = { type: "RUN_SCAN"; tabId: number };
 export type GetCachedScanMessage = { type: "GET_CACHED_SCAN"; tabId: number; url: string };
 export type ExtensionMessage = RunScanMessage | GetCachedScanMessage;
 
+// Service worker → popup broadcast while a scan runs.
+export type ScanStage = "collecting" | "analyzing";
+export type ScanProgressMessage = { type: "SCAN_PROGRESS"; tabId: number; stage: ScanStage };
+
 export type ScanOutcome =
   | { ok: true; result: ScanResponse }
   | { ok: false; error: { code: string; message: string; requestId: string | null } };

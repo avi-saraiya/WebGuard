@@ -1,18 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { installChromeMock, type ChromeMock } from "../test/setup";
+import { makeScanResponse } from "../test/fixtures";
 import type { ScanResponse } from "../types/scan";
 import { App } from "./App";
 
-const RESULT: ScanResponse = {
-  scan_id: "00000000-0000-0000-0000-000000000000",
-  target: { url: "https://example.com/", host: "example.com", scheme: "https" },
-  summary: { critical: 0, high: 1, medium: 2, low: 0, informational: 0 },
-  findings: [],
-  checks: [],
-  engine_version: "0.1.0-mock",
-  analyzed_at: "2026-10-03T00:00:00Z",
-};
+const RESULT = makeScanResponse({ summary: { critical: 0, high: 1, medium: 2, low: 0, informational: 0 } });
 
 let chromeMock: ChromeMock;
 
@@ -25,8 +18,10 @@ function givenActiveTab(url: string) {
 }
 
 function givenMessages(handlers: { cached?: ScanResponse | null; scan?: unknown }) {
-  chromeMock.runtime.sendMessage.mockImplementation(async (message: { type: string }) =>
-    message.type === "GET_CACHED_SCAN" ? { result: handlers.cached ?? null } : handlers.scan,
+  chromeMock.runtime.sendMessage.mockImplementation(async (message: unknown) =>
+    (message as { type: string }).type === "GET_CACHED_SCAN"
+      ? { result: handlers.cached ?? null }
+      : handlers.scan,
   );
 }
 

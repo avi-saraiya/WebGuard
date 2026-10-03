@@ -6,7 +6,12 @@ import { cleanup } from "@testing-library/react";
 export function createChromeMock() {
   let session: Record<string, unknown> = {};
   return {
-    runtime: { id: "test-extension-id", sendMessage: vi.fn(), onMessage: { addListener: vi.fn() } },
+    runtime: {
+      id: "test-extension-id",
+      sendMessage: vi.fn(async (_message: unknown): Promise<unknown> => undefined),
+      onMessage: { addListener: vi.fn(), removeListener: vi.fn() },
+    },
+    scripting: { executeScript: vi.fn(async (_injection: unknown): Promise<{ result?: unknown }[]> => []) },
     tabs: {
       query: vi.fn(async () => [] as chrome.tabs.Tab[]),
       get: vi.fn(),

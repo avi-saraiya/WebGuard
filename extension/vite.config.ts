@@ -24,6 +24,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // Tests run as if on an HTTPS page so collector mixed-content logic applies.
+    environmentOptions: { jsdom: { url: "https://example.test/account/page?token=secret#frag" } },
     globals: true,
     setupFiles: ["src/test/setup.ts"],
   },

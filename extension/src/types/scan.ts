@@ -48,10 +48,48 @@ export interface ScanResponse {
   summary: SeveritySummary;
   findings: Finding[];
   checks: CheckResult[];
+  partial: boolean;
+  notices: string[];
   engine_version: string;
   analyzed_at: string;
 }
 
-export interface ScanRequest {
+// ---- Request: what the in-page collector observes (mirrors app/schemas/scan.py) ----
+
+export interface HeaderCollection {
+  status: "collected" | "unavailable";
+  source: "refetch";
+  http_status: number | null;
+  /** Lowercase allowlisted header name → value. */
+  values: Record<string, string>;
+}
+
+export type ResourceKind =
+  "script" | "stylesheet" | "iframe" | "object" | "fetch" | "font" | "image" | "media" | "form" | "other";
+
+export interface InsecureResource {
+  url: string;
+  kind: ResourceKind;
+  source: "dom" | "performance";
+}
+
+export interface MixedContentCollection {
+  resources: InsecureResource[];
+  truncated: boolean;
+}
+
+export interface MetaPolicies {
+  content_security_policy: string[];
+  referrer: string | null;
+}
+
+export interface CollectedSignals {
+  collector_version: string;
+  headers: HeaderCollection;
+  meta: MetaPolicies;
+  mixed_content: MixedContentCollection;
+}
+
+export interface ScanRequest extends Partial<CollectedSignals> {
   url: string;
 }

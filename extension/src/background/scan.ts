@@ -1,7 +1,8 @@
+import { collectPageSignals } from "../collector/collectPageSignals";
 import { ApiError, createScan } from "../services/api";
-import type { CachedScanOutcome, ScanOutcome } from "../services/messaging";
+import type { CachedScanOutcome, ScanOutcome, ScanStage } from "../services/messaging";
 import { checkScanEligibility, stripQueryAndFragment } from "../services/url";
-import type { ScanResponse } from "../types/scan";
+import type { CollectedSignals, ScanResponse } from "../types/scan";
 
 interface CachedScan {
   url: string;
@@ -9,6 +10,25 @@ interface CachedScan {
 }
 
 const cacheKey = (tabId: number) => `scan:${tabId}`;
+
+function reportProgress(tabId: number, stage: ScanStage): void {
+  // The popup may have closed; a missing receiver is expected and harmless.
+  chrome.runtime.sendMessage({ type: "SCAN_PROGRESS", tabId, stage }).catch(() => undefined);
+}
+
+/** Injects the collector into the tab. Returns null if the page can't be inspected. */
+async function collectSignals(tabId: number): Promise<CollectedSignals | null> {
+  try {
+    const [injection] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: collectPageSignals,
+    });
+    return (injection?.result as CollectedSignals | undefined) ?? null;
+  } catch (err) {
+    console.warn("WebGuard collector could not run on this page", err);
+    return null;
+  }
+}
 
 export async function runScan(tabId: number): Promise<ScanOutcome> {
   const tab = await chrome.tabs.get(tabId);
@@ -18,8 +38,12 @@ export async function runScan(tabId: number): Promise<ScanOutcome> {
   }
 
   const url = stripQueryAndFragment(eligibility.url.href);
+  reportProgress(tabId, "collecting");
+  // If collection fails we still scan the URL; the backend marks dependent checks as undetermined.
+  const signals = await collectSignals(tabId);
+  reportProgress(tabId, "analyzing");
   try {
-    const result = await createScan({ url });
+    const result = await createScan({ url, ...signals });
     const entry: CachedScan = { url, result };
     // Session storage lives in memory only and is cleared when the browser closes.
     await chrome.storage.session.set({ [cacheKey(tabId)]: entry });
