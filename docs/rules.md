@@ -98,7 +98,8 @@ Every rule also reports a **check status**:
 
 ## Adding a rule
 1. Subclass `SecurityRule` in a module under `backend/app/rules/`. Give it the next `WEB-NNN` ID, `version = 1`,
-   a category, a title and at least one reference, then decorate it with `@register`.
+   a category, a problem-phrased `title`, a neutral `check_name` and at least one reference, then decorate it
+   with `@register`. If the module is new, import it in `backend/app/rules/__init__.py`.
 2. Return `unable_to_determine(...)` whenever an input wasn't collected. Never guess.
 3. Add positive and negative tests under `backend/tests/unit/rules/`.
 4. Add the rule to this catalog. Bump `version` whenever the rule's logic changes.

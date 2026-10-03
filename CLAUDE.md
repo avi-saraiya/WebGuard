@@ -6,7 +6,8 @@ severity, confidence and remediation. It is a portfolio project. It is **not** a
 a site "safe" or "malicious".
 
 Source of truth for scope and roadmap: [`docs/WebGuard_Project_Specification.md`](docs/WebGuard_Project_Specification.md).
-Approved implementation plan for the current phase: `/root/.claude/plans/assume-the-role-of-eager-ladybug.md`.
+Rule details: [`docs/rules.md`](docs/rules.md). Security model: [`docs/security.md`](docs/security.md). Architecture: [`docs/architecture.md`](docs/architecture.md).
+Each new phase starts with a plan agreed with the user before any code is written.
 
 ## Core principles
 - **Deterministic detection first; AI explanation second.** Rules decide findings; AI (from v1.1) only explains.
@@ -46,6 +47,8 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 ## Conventions
 - Rule IDs are `WEB-NNN`, catalogued in `docs/rules.md`. A finding's `id` equals its rule ID (one finding per rule per scan).
 - Finding fields: `id, rule_version, category, title, severity, confidence, description, location, rationale, evidence, recommendation, references, detected_at`.
+- Check fields: `rule_id, name, category, status, summary`. Scan responses also carry `partial` and `notices`.
+- Finding text may use `backticks` for code; the popup renders them as `<code>`.
 - Severity: `CRITICAL | HIGH | MEDIUM | LOW | INFORMATIONAL`. Confidence: `HIGH | MEDIUM | LOW`.
 - Check status: `PASS | MISSING | WEAK | MISCONFIGURED | NOT_APPLICABLE | UNABLE_TO_DETERMINE`.
 - Use cautious language in finding text ("potential", "may"). A detected pattern is not a proven vulnerability.
@@ -68,14 +71,15 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 ## Commands
 Run from the repo root (see `Makefile`):
 - `make install`: install backend (uv) and extension (npm) dependencies
-- `make test` / `make lint` / `make format` / `make build`
+- `make test` / `make lint` (also lints `tools/`) / `make format` / `make build`
 - `docker compose -f infrastructure/docker/docker-compose.yml up --build`: backend in Docker on 127.0.0.1:8000
 - `make dev-backend`: run the API on http://localhost:8000 (OpenAPI docs at /docs outside production)
+- `python3 tools/fixture-site/serve.py --https`: fixture pages with known findings on https://localhost:8443
 - Extension only (from `extension/`): `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` → load `extension/dist` unpacked.
 - Backend only (from `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run mypy app tests`. uv lives in `~/.local/bin`.
 
 ## Current status / next steps
-Phase: **v0.2.0 tagged (Milestone 1 complete).** Next: per spec §54, the cookie analyzer and third-party resource
+Phase: **v0.2.0 tagged and pushed (Milestone 1 complete).** Next: per spec §54, the cookie analyzer and third-party resource
 analyzer (v0.3). Plan that phase before coding; cookies need a new, justified permission.
 
 - [x] 0. CLAUDE.md + `.claude/settings.json`

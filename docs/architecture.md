@@ -49,6 +49,8 @@
 | `src/background/scan.ts` | Scan orchestration: eligibility check → inject collector → backend call → cache |
 | `src/collector/collectPageSignals.ts` | Self-contained function injected into the page; reads headers, meta policies, insecure URLs |
 | `src/popup/pages/` | Results page (summary, findings, checks) and finding detail view |
+| `src/components/` | Severity summary and badges, finding cards, checks list, evidence view, inline code text |
+| `src/services/messaging.ts` | Typed popup ↔ service worker messages, including scan progress updates |
 | `src/services/api.ts` | Typed backend client with timeout and error-envelope handling |
 | `src/types/scan.ts` | TypeScript mirror of the backend schemas |
 
@@ -69,8 +71,9 @@
 ## Rule engine
 
 The spec schedules the rule engine for v0.5. It was built early so that analyzers never need restructuring.
-Each rule is a small class with an ID (`WEB-NNN`), a version, a category, a title and references, and it
-implements `evaluate(ctx) -> RuleOutcome`. Rules never perform I/O; they only interpret the collected
+Each rule is a small class with an ID (`WEB-NNN`), a version, a category, references, a problem-phrased
+`title` (used for its finding) and a neutral `check_name` (used in the checks list). It implements
+`evaluate(ctx) -> RuleOutcome`. Rules never perform I/O; they only interpret the collected
 signals. That keeps them deterministic and easy to test.
 
 The collector runs in the browser and not on the server for three reasons:
@@ -78,6 +81,17 @@ The collector runs in the browser and not on the server for three reasons:
 - **Accurate data:** the analysis uses what the user's browser actually received, including `<meta>`
   policies and the resources the page actually loaded.
 - **Narrow permissions:** `activeTab` scopes access to the page the user chose to scan.
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/api/v1/health` | Liveness check and API version |
+| `POST` | `/api/v1/scans` | Analyze collected signals; returns findings, checks, severity summary, `partial` and `notices` |
+
+The request schema is `ScanRequest` in `backend/app/schemas/scan.py`, mirrored in `extension/src/types/scan.ts`.
+Every error uses the shape `{"error": {"code", "message", "request_id", "details?"}}`. OpenAPI docs are served
+at `/docs` outside production.
 
 ## Dependency decisions
 
