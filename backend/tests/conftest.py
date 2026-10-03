@@ -11,7 +11,7 @@ EXTENSION_ORIGIN = "chrome-extension://" + "a" * 32
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(environment="test", max_request_body_bytes=4096)
+    return Settings(environment="test", max_request_body_bytes=64 * 1024)
 
 
 @pytest.fixture

@@ -74,7 +74,7 @@ Phase: v0.1.0 tagged. Next: Milestone 1 (≈ v0.2), starting at step 5.
 - [x] 2. Backend skeleton (uv, FastAPI, config/logging/errors/middleware, health, mock POST /scans, pytest/ruff/mypy)
 - [x] 3. Extension skeleton (Vite React TS, manifest, service worker, popup + Run Scan → mock backend, Vitest)
 - [x] 4. Docker, CI, dependabot, architecture.md stub → tag v0.1.0
-- [ ] 5. Rule engine + schemas
+- [x] 5. Rule engine + schemas
 - [ ] 6. Rules WEB-001…008 with tests
 - [ ] 7. Collector (`collectPageSignals`) with jsdom tests
 - [ ] 8. Popup UI (summary, checks table, findings, detail, error/partial states)

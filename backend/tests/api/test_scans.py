@@ -66,7 +66,7 @@ def test_validation_errors_do_not_echo_input(client: TestClient) -> None:
 def test_scan_rejects_oversized_body(client: TestClient) -> None:
     response = client.post(
         "/api/v1/scans",
-        content=b'{"url": "' + b"a" * 5000 + b'"}',
+        content=b'{"url": "' + b"a" * 70_000 + b'"}',
         headers={"Content-Type": "application/json"},
     )
     assert response.status_code == 413
