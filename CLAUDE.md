@@ -39,6 +39,7 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
   `chrome.scripting.executeScript({ func })`, authorized by `activeTab`. Headers come from a cookieless
   same-origin `HEAD` re-fetch (GET fallback). Only allowlisted security headers are sent. URLs have query and
   fragment stripped. No `<all_urls>`, no `webRequest`.
+- Record the reason for every new significant dependency in the table in `docs/architecture.md`.
 - Backend is **stateless** (no DB) until the persistence phase (v0.6). No `GET /scans/{id}` yet.
 - The rule registry exists from day one (spec puts it at v0.5, pulled forward to avoid a refactor).
 
@@ -59,18 +60,19 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 Run from the repo root (see `Makefile`):
 - `make install`: install backend (uv) and extension (npm) dependencies
 - `make test` / `make lint` / `make format` / `make build`
+- `docker compose -f infrastructure/docker/docker-compose.yml up --build`: backend in Docker on 127.0.0.1:8000
 - `make dev-backend`: run the API on http://localhost:8000 (OpenAPI docs at /docs outside production)
 - Extension only (from `extension/`): `npm test`, `npm run lint`, `npm run typecheck`, `npm run build` → load `extension/dist` unpacked.
 - Backend only (from `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run mypy app tests`. uv lives in `~/.local/bin`.
 
 ## Current status / next steps
-Phase: v0.1 skeleton → Milestone 1 (≈ v0.2).
+Phase: v0.1.0 tagged. Next: Milestone 1 (≈ v0.2), starting at step 5.
 
 - [x] 0. CLAUDE.md + `.claude/settings.json`
 - [x] 1. Repo bootstrap (git init, .gitignore, .editorconfig, spec → docs/, README stub, Makefile)
 - [x] 2. Backend skeleton (uv, FastAPI, config/logging/errors/middleware, health, mock POST /scans, pytest/ruff/mypy)
 - [x] 3. Extension skeleton (Vite React TS, manifest, service worker, popup + Run Scan → mock backend, Vitest)
-- [ ] 4. Docker, CI, dependabot, architecture.md stub → tag v0.1.0
+- [x] 4. Docker, CI, dependabot, architecture.md stub → tag v0.1.0
 - [ ] 5. Rule engine + schemas
 - [ ] 6. Rules WEB-001…008 with tests
 - [ ] 7. Collector (`collectPageSignals`) with jsdom tests

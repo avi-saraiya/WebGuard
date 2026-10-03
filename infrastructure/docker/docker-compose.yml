@@ -1,0 +1,21 @@
+# Local development stack. Run from the repo root:
+#   docker compose -f infrastructure/docker/docker-compose.yml up --build
+name: webguard
+
+services:
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: ../infrastructure/docker/backend.Dockerfile
+    environment:
+      WEBGUARD_ENVIRONMENT: development
+      WEBGUARD_LOG_LEVEL: INFO
+    ports:
+      - "127.0.0.1:8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

@@ -19,6 +19,30 @@ tools/           Development utilities
 docs/            Specification, architecture, and security documentation
 ```
 
+## Quick start
+
+Prerequisites: [uv](https://docs.astral.sh/uv/), Node.js 22+, and Chrome. Docker is optional.
+
+```bash
+make install        # backend (uv) + extension (npm) dependencies
+make dev-backend    # API on http://localhost:8000
+make build          # extension → extension/dist
+```
+
+Alternatively, run the backend in Docker:
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.yml up --build
+```
+
+Then load `extension/dist` in Chrome via `chrome://extensions` → **Developer mode** → **Load unpacked**.
+
 ## Development
 
-Installation and development instructions will be added as the components land.
+```bash
+make test           # pytest + vitest
+make lint           # ruff, mypy, eslint, prettier, tsc
+make format         # auto-format backend + extension
+```
+
+Further reading: [architecture](docs/architecture.md), [backend](backend/README.md), [extension](extension/README.md).

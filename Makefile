@@ -17,6 +17,7 @@ lint:
 
 format:
 	cd backend && uv run ruff format . && uv run ruff check --fix .
+	cd extension && npm run format
 
 build:
 	cd extension && npm run build
