@@ -87,3 +87,91 @@ def test_cors_rejects_web_origin(client: TestClient) -> None:
         headers={"Origin": "https://evil.example", "Access-Control-Request-Method": "POST"},
     )
     assert "access-control-allow-origin" not in response.headers
+
+
+GOOD_SITE = {
+    "url": "https://good.example/",
+    "collector_version": "0.2.0",
+    "headers": {
+        "status": "collected",
+        "http_status": 200,
+        "values": {
+            "content-security-policy": "default-src 'self'; frame-ancestors 'none'",
+            "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "referrer-policy": "no-referrer",
+        },
+    },
+    "mixed_content": {"resources": []},
+}
+
+BAD_SITE = {
+    "url": "https://bad.example/login",
+    "headers": {
+        "status": "collected",
+        "http_status": 200,
+        "values": {"strict-transport-security": "max-age=300", "referrer-policy": "unsafe-url"},
+    },
+    "mixed_content": {
+        "resources": [
+            {"url": "http://cdn.bad.example/jquery.js", "kind": "script", "source": "dom"},
+            {"url": "http://bad.example/submit", "kind": "form", "source": "dom"},
+        ]
+    },
+}
+
+
+def test_full_scan_of_well_configured_site_has_no_findings(client: TestClient) -> None:
+    body = post_scan(client, GOOD_SITE).json()
+
+    assert body["findings"] == []
+    assert body["partial"] is False
+    assert body["notices"] == []
+    assert {c["rule_id"]: c["status"] for c in body["checks"]} == {
+        "WEB-001": "PASS",
+        "WEB-002": "PASS",
+        "WEB-003": "PASS",
+        "WEB-004": "PASS",
+        "WEB-005": "PASS",
+        "WEB-006": "PASS",
+        "WEB-007": "PASS",
+        "WEB-008": "PASS",
+    }
+
+
+def test_full_scan_of_poorly_configured_site(client: TestClient) -> None:
+    body = post_scan(client, BAD_SITE).json()
+
+    assert [(f["id"], f["severity"]) for f in body["findings"]] == [
+        ("WEB-001", "MEDIUM"),
+        ("WEB-004", "MEDIUM"),
+        ("WEB-002", "LOW"),
+        ("WEB-003", "LOW"),
+        ("WEB-005", "LOW"),
+        ("WEB-006", "LOW"),
+    ]
+    assert body["summary"] == {
+        "critical": 0,
+        "high": 0,
+        "medium": 2,
+        "low": 4,
+        "informational": 0,
+    }
+    statuses = {c["rule_id"]: c["status"] for c in body["checks"]}
+    assert statuses["WEB-007"] == "PASS"
+    assert statuses["WEB-008"] == "NOT_APPLICABLE"
+    for finding in body["findings"]:
+        assert finding["evidence"], f"{finding['id']} must carry evidence"
+        assert finding["recommendation"]
+        assert finding["references"]
+
+
+def test_scan_with_uncollected_headers_is_partial_without_header_findings(
+    client: TestClient,
+) -> None:
+    payload = {**GOOD_SITE, "headers": {"status": "unavailable"}}
+    body = post_scan(client, payload).json()
+
+    assert body["partial"] is True
+    assert body["findings"] == []
+    assert any("headers could not be collected" in n for n in body["notices"])
