@@ -77,5 +77,5 @@ Phase: v0.1.0 tagged. Next: Milestone 1 (≈ v0.2), starting at step 5.
 - [x] 5. Rule engine + schemas
 - [x] 6. Rules WEB-001…008 with tests
 - [x] 7. Collector (`collectPageSignals`) with jsdom tests
-- [ ] 8. Popup UI (summary, checks table, findings, detail, error/partial states)
+- [x] 8. Popup UI (summary, checks table, findings, detail, error/partial states)
 - [ ] 9. Docs (rules.md, security.md, README) + fixture site → tag v0.2.0
