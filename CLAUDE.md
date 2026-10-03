@@ -52,7 +52,8 @@ Each new phase starts with a plan agreed with the user before any code is writte
 - Severity: `CRITICAL | HIGH | MEDIUM | LOW | INFORMATIONAL`. Confidence: `HIGH | MEDIUM | LOW`.
 - Check status: `PASS | MISSING | WEAK | MISCONFIGURED | NOT_APPLICABLE | UNABLE_TO_DETERMINE`.
 - Use cautious language in finding text ("potential", "may"). A detected pattern is not a proven vulnerability.
-- One commit per implementation step, with a tag per version (`v0.1.0`, `v0.2.0`, …).
+- One commit per implementation step, with a tag per version (`v0.1.0`, `v0.2.0`, …). Never move or re-push a
+  published tag; cut a patch version instead.
 
 ## Gotchas
 - `collectPageSignals` is serialized by Chrome via `toString()`. It must not reference anything outside its own
@@ -79,7 +80,7 @@ Run from the repo root (see `Makefile`):
 - Backend only (from `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run mypy app tests`. uv lives in `~/.local/bin`.
 
 ## Current status / next steps
-Phase: **v0.2.0 tagged and pushed (Milestone 1 complete).** Next: per spec §54, the cookie analyzer and third-party resource
+Phase: **v0.2.1 tagged and pushed (Milestone 1 complete).** v0.2.1 only fixes doc formatting on top of v0.2.0. Next: per spec §54, the cookie analyzer and third-party resource
 analyzer (v0.3). Plan that phase before coding; cookies need a new, justified permission.
 
 - [x] 0. CLAUDE.md + `.claude/settings.json`

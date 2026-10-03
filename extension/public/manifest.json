@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WebGuard",
   "short_name": "WebGuard",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Evidence-based analysis of a website's observable security configuration.",
   "action": {
     "default_title": "WebGuard",
