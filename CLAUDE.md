@@ -51,6 +51,14 @@ Approved implementation plan for the current phase: `/root/.claude/plans/assume-
 - Use cautious language in finding text ("potential", "may"). A detected pattern is not a proven vulnerability.
 - One commit per implementation step, with a tag per version (`v0.1.0`, `v0.2.0`, …).
 
+## Gotchas
+- `collectPageSignals` is serialized by Chrome via `toString()`. It must not reference anything outside its own
+  body (type-only imports are fine). Its test re-evaluates the source in isolation; keep that test passing.
+- Rules have a problem-phrased `title` (used for findings) and a neutral `check_name` (used in the checks list).
+- Manual end-to-end: run the backend, then `python3 tools/fixture-site/serve.py --https`, load `extension/dist`
+  and scan the fixture pages. Each page states its expected findings. Headless automation can't click the toolbar
+  icon, so automated runs need a test-only host permission in place of the `activeTab` grant.
+
 ## Git
 - End commit messages with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` (attribution re-enabled
   from Milestone 1 onward; commits up to `v0.1.0` have none).
@@ -67,7 +75,8 @@ Run from the repo root (see `Makefile`):
 - Backend only (from `backend/`): `uv run pytest`, `uv run ruff check .`, `uv run mypy app tests`. uv lives in `~/.local/bin`.
 
 ## Current status / next steps
-Phase: v0.1.0 tagged. Next: Milestone 1 (≈ v0.2), starting at step 5.
+Phase: **v0.2.0 tagged (Milestone 1 complete).** Next: per spec §54, the cookie analyzer and third-party resource
+analyzer (v0.3). Plan that phase before coding; cookies need a new, justified permission.
 
 - [x] 0. CLAUDE.md + `.claude/settings.json`
 - [x] 1. Repo bootstrap (git init, .gitignore, .editorconfig, spec → docs/, README stub, Makefile)
@@ -78,4 +87,4 @@ Phase: v0.1.0 tagged. Next: Milestone 1 (≈ v0.2), starting at step 5.
 - [x] 6. Rules WEB-001…008 with tests
 - [x] 7. Collector (`collectPageSignals`) with jsdom tests
 - [x] 8. Popup UI (summary, checks table, findings, detail, error/partial states)
-- [ ] 9. Docs (rules.md, security.md, README) + fixture site → tag v0.2.0
+- [x] 9. Docs (rules.md, security.md, README) + fixture site → tag v0.2.0

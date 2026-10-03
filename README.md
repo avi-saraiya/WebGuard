@@ -1,23 +1,41 @@
 # WebGuard
 
 A Chrome extension and FastAPI backend that analyze the **observable security posture** of the website in the
-active tab and report evidence-based findings with severity, confidence, and remediation guidance.
+active tab and report evidence-based findings with severity, confidence and remediation guidance.
 
-WebGuard does not label websites "safe" or "malicious". Each finding comes from an explicit, tested rule and
-includes the evidence behind it.
+WebGuard does not label websites "safe" or "malicious", and it doesn't give a headline score. Every finding
+comes from an explicit, tested rule and shows the evidence behind it.
 
-> Status: early development (v0.1 skeleton). See the [project specification](docs/WebGuard_Project_Specification.md)
-> for the full roadmap.
+> **Status: v0.2 (Milestone 1).** HTTPS, security headers and mixed content are analyzed. See the
+> [project specification](docs/WebGuard_Project_Specification.md) for the roadmap.
 
-## Repository layout
+## What it checks
 
+| Rule | Check |
+|---|---|
+| WEB-001 | Content-Security-Policy present |
+| WEB-002 | Strict-Transport-Security present and long-lived |
+| WEB-003 | X-Content-Type-Options: nosniff |
+| WEB-004 | Mixed content (http: scripts, styles, frames, images, form targets on HTTPS pages) |
+| WEB-005 | Clickjacking protection (CSP frame-ancestors / X-Frame-Options) |
+| WEB-006 | Referrer-Policy |
+| WEB-007 | Page served over HTTPS |
+| WEB-008 | Risky CSP script sources ('unsafe-inline', 'unsafe-eval', wildcards) |
+
+Full logic, severities and rationale are in the [rule catalog](docs/rules.md).
+
+## How it works
+
+```text
+Popup ─▶ Service worker ─▶ Collector (in page, via activeTab)
+                 │            allowlisted headers · <meta> policies · http: resource URLs
+                 ▼
+          FastAPI /api/v1/scans ─▶ Rule engine ─▶ findings + per-rule checks ─▶ Popup
 ```
-extension/       Chrome extension (Manifest V3, TypeScript, React)
-backend/         FastAPI analysis API (Python 3.12, uv)
-infrastructure/  Docker and deployment configuration
-tools/           Development utilities
-docs/            Specification, architecture, and security documentation
-```
+
+Only minimal, privacy-filtered data leaves the browser: no cookies, page content or form values, and query
+strings are stripped. See the [security & privacy model](docs/security.md) and the
+[architecture](docs/architecture.md).
 
 ## Quick start
 
@@ -35,7 +53,20 @@ Alternatively, run the backend in Docker:
 docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
-Then load `extension/dist` in Chrome via `chrome://extensions` → **Developer mode** → **Load unpacked**.
+Then load the extension:
+1. Open `chrome://extensions`.
+2. Turn on **Developer mode**.
+3. Click **Load unpacked** and select `extension/dist`.
+4. Visit a site, click WebGuard, and press **Run Scan**.
+
+### Try it on known configurations
+
+`tools/fixture-site` serves pages with deliberately good and bad configurations. Each page states the findings
+you should expect to see.
+
+```bash
+python3 tools/fixture-site/serve.py --https   # https://localhost:8443 (self-signed; click through the warning)
+```
 
 ## Development
 
@@ -45,4 +76,13 @@ make lint           # ruff, mypy, eslint, prettier, tsc
 make format         # auto-format backend + extension
 ```
 
-Further reading: [architecture](docs/architecture.md), [backend](backend/README.md), [extension](extension/README.md).
+Further reading: [backend](backend/README.md) · [extension](extension/README.md) · [rules](docs/rules.md) ·
+[security](docs/security.md) · [architecture](docs/architecture.md).
+
+## Limitations
+
+- Headers come from a cookieless re-fetch of the page, which can differ from the logged-in response.
+- Each scan covers the current page at one point in time. It isn't a site-wide crawl.
+- No findings does **not** mean a site is secure. It only means these checks found nothing.
+
+More detail: [docs/security.md](docs/security.md#known-limitations).

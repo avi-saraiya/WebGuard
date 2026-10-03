@@ -1,6 +1,6 @@
 # WebGuard Architecture
 
-> Status: v0.1 skeleton. The analysis engine and the in-page collector arrive in Milestone 1 (v0.2).
+> Status: v0.2 (Milestone 1). The deterministic rule engine and in-page collector are implemented. There is no database yet.
 
 ## Overview
 
@@ -10,7 +10,7 @@
  │  Popup (React)  ──message──▶  Service worker           │
  │       ▲                         │   │                  │
  │       └──────── result ─────────┘   │ executeScript    │
- │                                     ▼ (v0.2)           │
+ │                                     ▼                  │
  │                              Collector (in page)       │
  └─────────────────────────────────────┼──────────────────┘
                                        │ HTTPS / JSON
@@ -18,15 +18,24 @@
                         FastAPI  /api/v1/scans
                                        │
                                        ▼
-                         Rule engine (v0.2) → findings
+              Rule engine (WEB-001…008) → findings + checks
 ```
 
 1. The user opens the popup. The popup reads the active tab URL, which the `activeTab` grant makes available.
 2. **Run Scan** sends `RUN_SCAN` to the service worker. The worker owns the scan so it finishes even if the
    popup closes. The worker only accepts messages from the extension's own pages.
-3. The worker sends the page's signals to the backend. In v0.1 that is just the URL, with query and fragment
-   stripped.
-4. The backend validates the request, runs the rules (a mock in v0.1) and returns findings and checks.
+3. The worker injects `collectPageSignals` into the tab with `chrome.scripting.executeScript`. The collector
+   gathers:
+   - allowlisted security headers, via a cookieless same-origin HEAD re-fetch
+   - `<meta>` CSP and referrer tags
+   - `http:` resource URLs, with query strings stripped
+
+   It sends progress updates ("collecting", then "analyzing") to the popup. If injection fails, the scan
+   continues with the URL only.
+4. The worker POSTs the URL and signals to the backend. The backend validates them, builds a `ScanContext`,
+   and runs every registered rule. Each rule returns a check status and, only when there is evidence, a
+   finding. If a rule crashes, its check becomes `UNABLE_TO_DETERMINE` and the rest of the scan continues
+   (partial results).
 5. The worker caches the result per tab in `chrome.storage.session`, which is memory-only and cleared when
    the browser closes, and returns it to the popup.
 
@@ -37,7 +46,9 @@
 |---|---|
 | `src/popup/` | React UI: current site, scan state, results |
 | `src/background/service-worker.ts` | Message routing, sender validation, cache cleanup |
-| `src/background/scan.ts` | Scan orchestration: eligibility check → backend call → cache |
+| `src/background/scan.ts` | Scan orchestration: eligibility check → inject collector → backend call → cache |
+| `src/collector/collectPageSignals.ts` | Self-contained function injected into the page; reads headers, meta policies, insecure URLs |
+| `src/popup/pages/` | Results page (summary, findings, checks) and finding detail view |
 | `src/services/api.ts` | Typed backend client with timeout and error-envelope handling |
 | `src/types/scan.ts` | TypeScript mirror of the backend schemas |
 
@@ -49,7 +60,24 @@
 | `app/core/middleware.py` | Request IDs and access logs, body size limit |
 | `app/core/errors.py` | Uniform `{"error": {...}}` responses that never echo input |
 | `app/core/logging.py` | JSON structured logging |
-| `app/schemas/` | Pydantic request/response models (Finding, CheckResult, ScanResponse) |
+| `app/schemas/` | Pydantic request/response models (ScanRequest, Finding, CheckResult, ScanResponse) |
+| `app/analyzers/context.py` | `ScanContext`: a normalized, read-only view of the request that rules evaluate |
+| `app/analyzers/csp.py` | CSP parser that handles multiple policies |
+| `app/analyzers/engine.py` | Runs every rule in isolation, sorts findings, counts severities, adds notices |
+| `app/rules/` | `SecurityRule` base class, `@register` registry, and the rules themselves (see [rules.md](rules.md)) |
+
+## Rule engine
+
+The spec schedules the rule engine for v0.5. It was built early so that analyzers never need restructuring.
+Each rule is a small class with an ID (`WEB-NNN`), a version, a category, a title and references, and it
+implements `evaluate(ctx) -> RuleOutcome`. Rules never perform I/O; they only interpret the collected
+signals. That keeps them deterministic and easy to test.
+
+The collector runs in the browser and not on the server for three reasons:
+- **No SSRF:** the backend never fetches arbitrary URLs.
+- **Accurate data:** the analysis uses what the user's browser actually received, including `<meta>`
+  policies and the resources the page actually loaded.
+- **Narrow permissions:** `activeTab` scopes access to the page the user chose to scan.
 
 ## Dependency decisions
 
