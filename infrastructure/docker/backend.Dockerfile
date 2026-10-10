@@ -10,7 +10,7 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY app ./app
 
 # ---- runtime stage: slim image, no build tooling, non-root user ----
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.14-slim-bookworm AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH" \
